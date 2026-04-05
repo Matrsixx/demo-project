@@ -2,8 +2,6 @@ package com.example.demo.Student;
 
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.Month;
 import java.util.List;
 
 @RestController

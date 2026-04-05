@@ -16,7 +16,7 @@ public class StudentService {
     }
 
     public List<Student> GetStudent() {
-        return (List<Student>) studentRepository.findAll();
+        return studentRepository.findAll();
     }
 
     public Student SaveStudent(@RequestBody Student student) {
