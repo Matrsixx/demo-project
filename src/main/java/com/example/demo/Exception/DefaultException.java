@@ -1,8 +1,16 @@
 package com.example.demo.Exception;
 
-public class DefaultException extends RuntimeException {
+import org.springframework.http.HttpStatus;
 
-    public DefaultException(String message) {
+public class DefaultException extends RuntimeException {
+    private final HttpStatus status;
+
+    public DefaultException(HttpStatus status, String message) {
         super(message);
+        this.status = status;
+    }
+
+    public HttpStatus getStatus() {
+        return status;
     }
 }

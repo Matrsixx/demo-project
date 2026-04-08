@@ -1,6 +1,10 @@
     package com.example.demo.Auth;
 
     import com.example.demo.Exception.DefaultException;
+    import org.springframework.http.HttpStatus;
+    import org.springframework.security.core.Authentication;
+    import org.springframework.security.core.AuthenticationException;
+    import org.springframework.security.core.context.SecurityContextHolder;
     import org.springframework.security.crypto.password.PasswordEncoder;
     import org.springframework.stereotype.Service;
     import org.springframework.security.authentication.AuthenticationManager;
@@ -20,7 +24,7 @@
 
         public AuthResponse register(AuthRequest request) {
             if (userRepository.existsByUsername(request.getUsername())) {
-                throw new DefaultException("Username already exists");
+                throw new DefaultException(HttpStatus.CONFLICT, "Username already exists");
             }
 
             User user = new User(
@@ -35,14 +39,31 @@
         }
 
         public AuthResponse login(AuthRequest request) {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                        request.getUsername(), request.getPassword()
-                    )
-            );
+            try {
+                Authentication latestResult = authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                request.getUsername(), request.getPassword()
+                        )
+                );
+
+                Authentication previousResult = SecurityContextHolder.getContext().getAuthentication();
+
+                if (previousResult != null && previousResult.isAuthenticated()) {
+                    latestResult = latestResult.toBuilder()
+                            .authorities((a) -> a.addAll(previousResult.getAuthorities()))
+                            .build();
+                }
+
+                System.out.println(latestResult);
+
+            }catch (AuthenticationException e) {
+                throw new DefaultException(HttpStatus.UNAUTHORIZED, "Invalid username or password");
+            }
+
+
 
             User user = userRepository.findByUsername(request.getUsername())
-                    .orElseThrow(() -> new DefaultException("User not found"));
+                    .orElseThrow(() -> new DefaultException(HttpStatus.UNAUTHORIZED, "User not found"));
 
             return new AuthResponse(user.getUsername(), user.getRole());
         }

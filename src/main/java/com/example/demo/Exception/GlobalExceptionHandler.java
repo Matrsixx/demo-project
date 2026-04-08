@@ -13,9 +13,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = DefaultException.class)
     public ResponseEntity<ErrorResponse> handleDefaultException(DefaultException ex){
         ErrorResponse error = new ErrorResponse(
-                HttpStatus.CONFLICT.value(),
+                ex.getStatus().value(),
                 ex.getMessage()
         );
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+        return ResponseEntity.status(ex.getStatus()).body(error);
     }
 }
